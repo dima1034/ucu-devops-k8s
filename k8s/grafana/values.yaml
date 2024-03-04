@@ -24,15 +24,15 @@ grafana:
     namespace: monitoring
 
   # This is a way to set rules about which nodes your pods can run on, based on the labels those nodes have. In this case, you're using nodeAffinity with requiredDuringSchedulingIgnoredDuringExecution, which means that the scheduler will only place the pod on a node if the run: monitoring label is present. If the label is removed from the node while the pod is running, the pod will not be removed.
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #       - matchExpressions:
-  #         - key: insights
-  #           operator: In
-  #           values:
-  #           - "true"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: insights
+            operator: In
+            values:
+            - "true"
             
   # This is a simpler form of node selection criteria. It works by adding a label to a node, then adding a corresponding nodeSelector to the pod. The pod will then be scheduled on nodes with matching labels. In this case, the pod will be scheduled on nodes with the run: monitoring label.
   nodeSelector:

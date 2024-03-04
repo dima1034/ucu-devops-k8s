@@ -52,15 +52,15 @@ prometheus:
       existingClaim: pvc-prometheus
       namespace: monitoring
 
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #       - matchExpressions:
-  #         - key: run
-  #           operator: In
-  #           values:
-  #           - monitoring
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: insights
+            operator: In
+            values:
+            - "true"
 
   alertmanager:
     nodeSelector:
