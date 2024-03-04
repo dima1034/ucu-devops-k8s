@@ -1,0 +1,88 @@
+prometheus:
+  rbac:
+    create: true
+    rules:
+      - apiGroups: [""]
+        resources:
+        - nodes
+        - nodes/metrics
+        - services
+        - endpoints
+        - pods
+        verbs: ["get", "list", "watch"]
+      - apiGroups: [""]
+        resources:
+        - configmaps
+        verbs: ["get"]
+      - apiGroups:
+        - networking.k8s.io
+        resources:
+        - ingresses
+        verbs: ["get", "list", "watch"]
+      - nonResourceURLs: ["/metrics"]
+        verbs: ["get"]
+
+  serviceAccounts:
+    create: true
+    name: prometheus
+
+
+  # ClusterIP: This is the default type of service in Kubernetes. It gives your service an internal IP address that is accessible only within the cluster. This means that applications can communicate with each other using this internal IP, but the service is not accessible from outside the cluster. If you want to access a ClusterIP service from outside the cluster, you would typically use a Kubernetes Ingress.
+
+  # NodePort: This type of service exposes the application on a static port on each Node's IP address. This means that the service is accessible from outside the cluster by connecting to the Node's IP address and the NodePort. The NodePort is in the range 30000-32767. Note that using NodePort exposes your application on the same port on every Node, which could be a potential security risk.
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    externalIPs: []
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    port: 9090
+    nodePort: 9090
+    servicePort: 9090
+    sessionAffinity: ClientIP
+    type: NodePort
+    selector:
+      app.kubernetes.io/name: prometheus
+
+  server:
+    persistentVolume:
+      enabled: true
+      storageClass: managed-csi
+      existingClaim: pvc-prometheus
+      namespace: monitoring
+
+  # affinity:
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #       - matchExpressions:
+  #         - key: run
+  #           operator: In
+  #           values:
+  #           - monitoring
+
+  alertmanager:
+    nodeSelector:
+      insights: "true"
+  nodeExporter:
+    nodeSelector:
+      insights: "true"
+  server:
+    nodeSelector:
+      insights: "true"
+  pushgateway:
+    nodeSelector:
+      insights: "true"
+
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 10
+
+pv: 
+  subscription: "<FROM ENV>"
+  resource_group: "<FROM ENV>"
+  disk_name: "<FROM ENV>"

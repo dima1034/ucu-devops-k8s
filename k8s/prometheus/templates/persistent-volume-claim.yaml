@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-prometheus
+  namespace: monitoring
+spec:
+  volumeName: pv-azuredisk-prometheus
+  storageClassName: managed-csi
+  accessModes:
+    - ReadWriteOnce 
+  resources:
+    requests:
+      storage: 4Gi 

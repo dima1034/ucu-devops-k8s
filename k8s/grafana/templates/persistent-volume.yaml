@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-azuredisk-grafana
+spec:
+  capacity:
+    storage: 4Gi
+  # States for the storage class that the volume is managed by the CSI driver
+  storageClassName: managed-csi
+  # Retain will keep the disk even after the PVC is deleted
+  persistentVolumeReclaimPolicy: Retain
+  accessModes:
+    - ReadWriteOnce
+  csi:
+    driver: disk.csi.azure.com
+    readOnly: false
+    volumeHandle: /subscriptions/{{ .Values.pv.subscription }}/resourceGroups/{{ .Values.pv.resource_group }}/providers/Microsoft.Compute/disks/{{ .Values.pv.disk_name }}
+    volumeAttributes:
+      fsType: ext4

@@ -1,0 +1,36 @@
+repositories:
+  - name: "prometheus"
+    url: "https://prometheus-community.github.io/helm-charts"
+  - name: "grafana"
+    url: "https://grafana.github.io/helm-charts" 
+
+hooks:
+  - events: ["prepare"]
+    showlogs: true
+    command: "bash"
+    args: ["-c", "source install-cert-manager-crds.sh"]
+
+releases:
+
+  - name: prometheus
+    namespace: monitoring
+    chart: ./prometheus
+    set:
+      - name: pv.subscription
+        value: {{ requiredEnv "AZURE_SUBSCRIPTION_ID" }}
+      - name: pv.resource_group
+        value: {{ requiredEnv "AZURE_RESOURCE_GROUP" }}
+      - name: pv.disk_name
+        value: {{ requiredEnv "PROMETHEUS_AZURE_DISK_NAME" }}
+
+  - name: grafana
+    namespace: monitoring
+    chart: ./grafana
+    needs: ["monitoring/prometheus"]
+    set:
+      - name: pv.subscription
+        value: {{ requiredEnv "AZURE_SUBSCRIPTION_ID" }}
+      - name: pv.resource_group
+        value: {{ requiredEnv "AZURE_RESOURCE_GROUP" }}
+      - name: pv.disk_name
+        value: {{ requiredEnv "GRAFANA_AZURE_DISK_NAME" }}

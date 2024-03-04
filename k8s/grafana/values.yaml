@@ -1,0 +1,51 @@
+grafana:
+
+  env:
+    GF_SECURITY_ADMIN_USER: "admin"
+    GF_SECURITY_ADMIN_PASSWORD: "yourStrongPassword"
+
+  service:
+    # This specifies the type of the service. NodePort means that the service will be accessible at a static port on each node in addition to its internal cluster IP.
+    type: NodePort
+    # This is the port that the service will be accessible on within the cluster. Other pods within the cluster can connect to this service on this port.
+    port: 3000
+    # This is the port on the pod that the service will forward traffic to. In this case, it's also port 3000, which means that traffic coming into the service on port 3000 will be forwarded to port 3000 on the pods that the service targets.
+    targetPort: 3000
+    # Since the service type is NodePort, this is the port that the service will be accessible on each node. External traffic can reach the service by connecting to this port on any node in the cluster.
+    nodePort: 32000
+    annotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/port: '3000'
+
+  persistence:
+    enabled: true
+    storageClassName: managed-csi
+    existingClaim: pvc-grafana
+    namespace: monitoring
+
+  # This is a way to set rules about which nodes your pods can run on, based on the labels those nodes have. In this case, you're using nodeAffinity with requiredDuringSchedulingIgnoredDuringExecution, which means that the scheduler will only place the pod on a node if the run: monitoring label is present. If the label is removed from the node while the pod is running, the pod will not be removed.
+  # affinity:
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #       - matchExpressions:
+  #         - key: insights
+  #           operator: In
+  #           values:
+  #           - "true"
+            
+  # This is a simpler form of node selection criteria. It works by adding a label to a node, then adding a corresponding nodeSelector to the pod. The pod will then be scheduled on nodes with matching labels. In this case, the pod will be scheduled on nodes with the run: monitoring label.
+  nodeSelector:
+    insights: "true"
+
+  # Tolerations work with taints to ensure that pods are not scheduled onto inappropriate nodes. A taint is applied to a node to repel pods, unless the pod has a matching toleration. In this case, the pod has a toleration for the run: monitoring taint, with the effect NoSchedule. This means the pod can be scheduled on a node with the run: monitoring taint.
+  tolerations:
+    - key: "insights"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+
+pv:
+  subscription: "<FROM ENV>"
+  resource_group: "<FROM ENV>"
+  disk_name: "<FROM ENV>"
